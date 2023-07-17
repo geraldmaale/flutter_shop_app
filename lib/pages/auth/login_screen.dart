@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop_app/endpoints/auth_endpoints.dart';
+import 'package:flutter_shop_app/helpers/api_result.dart';
 import 'package:flutter_shop_app/pages/auth/register_screen.dart';
 import 'package:flutter_shop_app/pages/nature.dart';
+import 'package:logger/logger.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,9 +15,15 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   // properties
-  late String email;
-  late String password;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final logger = Logger();
   bool isLoading = false;
+
+  Future<ApiResult> loginFuture() async {
+    return await AuthEndpoints()
+        .loginUser(_emailController.text, _passwordController.text);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               TextFormField(
                 validator: (value) => value!.isEmpty ? 'Enter email' : null,
-                onChanged: (value) => email = value,
+                controller: _emailController,
                 decoration: const InputDecoration(
                   labelText: 'Email Address',
                   hintText: "Enter email address",
@@ -64,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               TextFormField(
                 validator: (value) => value!.isEmpty ? 'Enter password' : null,
-                onChanged: (value) => password = value,
+                controller: _passwordController,
                 obscureText: true,
                 obscuringCharacter: '*',
                 decoration: const InputDecoration(
@@ -80,64 +88,52 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(
                 height: 8,
               ),
-              InkWell(
-                onTap: () async {
+              ElevatedButton(
+                onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // enable loading state
                     setState(() {
                       isLoading = true;
                     });
-                    var result =
-                        await AuthEndpoints().loginUser(email, password);
-
-                    // disable loading state
-                    setState(() {
-                      isLoading = false;
+                    loginFuture().then((value) {
+                      setState(() {
+                        isLoading = false;
+                      });
+                      if (value.isSuccessful) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) {
+                            return const Nature();
+                          }),
+                          (route) => false,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(value.message),
+                            backgroundColor:
+                                const Color.fromARGB(255, 184, 15, 3),
+                          ),
+                        );
+                      }
                     });
-
-                    if (result.isSuccessful) {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) {
-                          return const Nature();
-                        }),
-                        (route) => false,
-                      );
-                    } else {
-                      // show error message
-                      final SnackBar snackBar = SnackBar(
-                        content: Text(result.message),
-                        action: SnackBarAction(
-                          label: 'Ok',
-                          textColor: Colors.white,
-                          onPressed: () {},
-                        ),
-                        backgroundColor: const Color.fromARGB(255, 167, 15, 4),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    }
                   }
                 },
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: isLoading
-                        ? const CircularProgressIndicator(
+                child: Center(
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
                             color: Colors.white,
-                          )
-                        : const Text(
-                            "Login",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
                           ),
-                  ),
+                        )
+                      : const Text(
+                          "Login",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(
