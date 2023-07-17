@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shop_app/components/avatar.dart';
 import 'package:flutter_shop_app/endpoints/auth_endpoints.dart';
 import 'package:flutter_shop_app/helpers/api_result.dart';
 import 'package:flutter_shop_app/pages/auth/register_screen.dart';
@@ -14,22 +13,18 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  // properties
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final logger = Logger();
-  bool isLoading = false;
 
-  Future<ApiResult> loginFuture() async {
-    return await AuthEndpoints()
-        .loginUser(_emailController.text, _passwordController.text);
-  }
+  Future<ApiResult>? _loginFuture;
+
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
       body: Form(
         key: _formKey,
         child: Padding(
@@ -37,28 +32,40 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 "Login Account",
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 3,
-                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              const SizedBox(
-                height: 16,
+              const Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundColor: Color.fromARGB(255, 164, 220, 247),
+                    child: Icon(
+                      Icons.person,
+                      size: 55,
+                    ),
+                  ),
+                ],
               ),
-              const Avatar(),
               TextFormField(
-                validator: (value) => value!.isEmpty ? 'Enter username' : null,
                 controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  hintText: "Enter username",
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Enter email address';
+                  }
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Email Address',
+                  hintText: "Enter email address",
                   prefixIcon: Icon(
-                    Icons.person_2,
-                    color: Theme.of(context).colorScheme.primary,
+                    Icons.email,
+                    color: Colors.blue,
                   ),
                 ),
               ),
@@ -66,16 +73,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 8,
               ),
               TextFormField(
-                validator: (value) => value!.isEmpty ? 'Enter password' : null,
-                controller: _passwordController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Enter password';
+                  }
+                  return null;
+                },
                 obscureText: true,
                 obscuringCharacter: '*',
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Password',
                   hintText: "Enter password",
                   prefixIcon: Icon(
                     Icons.lock_person,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Colors.blue,
                   ),
                 ),
                 keyboardType: TextInputType.visiblePassword,
@@ -84,17 +95,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 8,
               ),
               ElevatedButton(
-                onPressed: isLoading ? null : _onLogin,
+                style: const ButtonStyle(
+                  minimumSize: MaterialStatePropertyAll(
+                    Size(double.infinity, 50),
+                  ),
+                ),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    setState(() {
+                      _loginFuture = AuthEndpoints().loginUser(
+                        _emailController.text,
+                        _passwordController.text,
+                      );
+                    });
+                  }
+                },
                 child: Center(
                   child: isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(),
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
                         )
                       : const Text(
                           "Login",
                           style: TextStyle(
+                            color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -104,6 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(
                 height: 8,
               ),
+              if (_loginFuture != null) fetchFromApi(_loginFuture),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -139,42 +164,29 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _onLogin() {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        isLoading = true;
-      });
-      loginFuture().then((value) {
-        setState(() {
-          isLoading = false;
-        });
-        if (value.isSuccessful) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return const Nature();
-            }),
-            (route) => false,
-          );
+  FutureBuilder<ApiResult> fetchFromApi(Future<ApiResult>? loginFuture) {
+    return FutureBuilder<ApiResult>(
+      future: loginFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text("Error: ${snapshot.error}");
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(value.message,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.tertiary,
-                    )),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                action: SnackBarAction(
-                  backgroundColor: Theme.of(context).colorScheme.tertiary,
-                  textColor: Theme.of(context).colorScheme.error,
-                  label: 'Ok',
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  },
-                )),
-          );
+          if (snapshot.data!.isSuccessful) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return const Nature();
+              }),
+              (route) => false,
+            );
+          } else {
+            return Text("Error: ${snapshot.data!.message}");
+          }
         }
-      });
-    }
+        return const SizedBox.shrink(); // add a return statement at the end
+      },
+    );
   }
 }

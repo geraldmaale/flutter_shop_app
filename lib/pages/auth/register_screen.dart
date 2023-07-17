@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop_app/components/avatar.dart';
 import 'package:flutter_shop_app/endpoints/auth_endpoints.dart';
+import 'package:flutter_shop_app/helpers/api_result.dart';
 import 'package:flutter_shop_app/pages/auth/login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -13,11 +15,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   // properties for fields
-  late String email;
-  late String password;
-  late String confirmPassword;
-  late String fullName;
+  final _emailController = TextEditingController();
+  final _fullNameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   bool isLoading = false;
+
+  Future<ApiResult> registerFuture() async {
+    return await AuthEndpoints().createUser(
+      _emailController.text,
+      _fullNameController.text,
+      _passwordController.text,
+      _confirmPasswordController.text,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,192 +37,178 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         title: const Text('Register Account'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Color.fromARGB(255, 164, 220, 247),
-                      child: Icon(
-                        Icons.person,
-                        size: 55,
+      body: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.background,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Avatar(),
+                  TextFormField(
+                    validator: (value) =>
+                        value!.isEmpty ? 'Enter username' : null,
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      hintText: "Enter username",
+                      prefixIcon: Icon(
+                        Icons.person_2,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
-                  ],
-                ),
-                TextFormField(
-                  validator: (value) => value!.isEmpty ? 'Enter email' : null,
-                  onChanged: (value) => email = value,
-                  decoration: const InputDecoration(
-                    labelText: 'Email Address',
-                    hintText: "Enter email address",
-                    prefixIcon: Icon(
-                      Icons.email,
-                      color: Colors.blue,
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  TextFormField(
+                    validator: (value) =>
+                        value!.isEmpty ? 'Enter full name' : null,
+                    controller: _fullNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Full Name',
+                      hintText: "Enter full name",
+                      prefixIcon: Icon(
+                        Icons.person,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                TextFormField(
-                  validator: (value) =>
-                      value!.isEmpty ? 'Enter full name' : null,
-                  onChanged: (value) => fullName = value,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    hintText: "Enter full name",
-                    prefixIcon: Icon(
-                      Icons.person,
-                      color: Colors.blue,
-                    ),
+                  const SizedBox(
+                    height: 8,
                   ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                TextFormField(
-                  validator: (value) =>
-                      value!.isEmpty ? 'Enter password' : null,
-                  onChanged: (value) => password = value,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    hintText: "Enter password",
-                    prefixIcon: Icon(
-                      Icons.lock_person,
-                      color: Colors.blue,
+                  TextFormField(
+                    validator: (value) =>
+                        value!.isEmpty ? 'Enter password' : null,
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      hintText: "Enter password",
+                      prefixIcon: Icon(
+                        Icons.lock_person,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
+                    obscureText: true,
+                    obscuringCharacter: '*',
                   ),
-                  obscureText: true,
-                  obscuringCharacter: '*',
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                TextFormField(
-                  validator: (value) =>
-                      value!.isEmpty ? 'Confirm password' : null,
-                  onChanged: (value) => confirmPassword = value,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm Password',
-                    hintText: "Enter password",
-                    prefixIcon: Icon(
-                      Icons.lock_person,
-                      color: Colors.blue,
-                    ),
+                  const SizedBox(
+                    height: 8,
                   ),
-                  obscureText: true,
-                  obscuringCharacter: '*',
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                InkWell(
-                  onTap: () async {
-                    if (_formKey.currentState!.validate()) {
-                      // show loading indicator
-                      setState(() {
-                        isLoading = true;
-                      });
-
-                      var result = await AuthEndpoints().createUser(
-                          email, fullName, password, confirmPassword);
-
-                      // hide loading indicator
-                      setState(() {
-                        isLoading = false;
-                      });
-
-                      if (result.isSuccessful) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) {
-                            return const LoginScreen();
-                          }),
-                          (route) => false,
-                        );
-                      } else {
-                        // show error message
-                        final SnackBar snackBar = SnackBar(
-                          content: Text(result.message),
-                          action: SnackBarAction(
-                            label: 'Ok',
-                            textColor: Colors.white,
-                            onPressed: () {},
-                          ),
-                          backgroundColor:
-                              const Color.fromARGB(255, 167, 15, 4),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                      }
-                    }
-                  },
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(10),
+                  TextFormField(
+                    validator: (value) =>
+                        value!.isEmpty ? 'Confirm password' : null,
+                    controller: _confirmPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'Confirm Password',
+                      hintText: "Enter password",
+                      prefixIcon: Icon(
+                        Icons.lock_person,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
+                    obscureText: true,
+                    obscuringCharacter: '*',
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  ElevatedButton(
+                    onPressed: isLoading ? null : _onRegister,
                     child: Center(
                       child: isLoading
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(),
                             )
                           : const Text(
                               "Register",
                               style: TextStyle(
-                                color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 2,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                     ),
                   ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Already have an account?",
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        "Login",
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Already have an account?",
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.blue,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Login",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.normal,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  void _onRegister() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
+      registerFuture().then((value) {
+        setState(() {
+          isLoading = false;
+        });
+        if (value.isSuccessful) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return const LoginScreen();
+            }),
+            (route) => false,
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(value.message,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.tertiary,
+                    )),
+                backgroundColor: Theme.of(context).colorScheme.error,
+                action: SnackBarAction(
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                  textColor: Theme.of(context).colorScheme.error,
+                  label: 'Ok',
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                )),
+          );
+        }
+      });
+    }
   }
 }

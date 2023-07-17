@@ -5,92 +5,113 @@ class Nature extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter layout demo',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Talk about nature'),
-        ),
-        body: ListView(
-          children: [
-            Image.asset(
-              'images/lake.jpg',
-              width: 600,
-              height: 240,
-              fit: BoxFit.cover,
-            ),
-            titleSection,
-            buttonSection,
-            textSection,
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      appBar: AppBar(
+        title: const Text('Talk about nature'),
+      ),
+      body: ListView(
+        children: [
+          Image.asset(
+            'images/lake.jpg',
+            width: 600,
+            height: 240,
+            fit: BoxFit.cover,
+          ),
+          titleSection(context),
+          buttonSection(context),
+          textSection(context),
+        ],
       ),
     );
   }
 }
 
-Widget titleSection = Container(
-  padding: const EdgeInsets.all(32),
-  child: Row(
-    children: [
-      Expanded(
-        /*1*/
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /*2*/
-            Container(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: const Text(
-                'Oeschinen Lake Campground',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
+Widget titleSection(BuildContext context) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.background,
+    ),
+    padding: const EdgeInsets.all(32),
+    child: Row(
+      children: [
+        Expanded(
+          /*1*/
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /*2*/
+              Container(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  'Oeschinen Lake Campground',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
-            ),
-            Text(
-              'Kandersteg, Switzerland',
-              style: TextStyle(
-                color: Colors.grey[500],
-              ),
-            ),
-          ],
+              Text('Kandersteg, Switzerland',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                  )),
+            ],
+          ),
+        ),
+        /*3*/
+        Icon(
+          Icons.star,
+          color: Theme.of(context).colorScheme.error,
+        ),
+        Text('41',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.error,
+            )),
+      ],
+    ),
+  );
+}
+
+Widget buttonSection(BuildContext context) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      _buildButtonColumn(
+          context, Theme.of(context).colorScheme.primary, Icons.call, 'CALL'),
+      _buildButtonColumn(context, Theme.of(context).colorScheme.primary,
+          Icons.near_me, 'ROUTE'),
+      _buildButtonColumn(
+          context, Theme.of(context).colorScheme.primary, Icons.share, 'SHARE'),
+    ],
+  );
+}
+
+Widget textSection(BuildContext context) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.background,
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Text(
+        'Lake Oeschinen lies at the foot of the Blüemlisalp in the Bernese '
+        'Alps. Situated 1,578 meters above sea level, it is one of the '
+        'larger Alpine Lakes. A gondola ride from Kandersteg, followed by a '
+        'half-hour walk through pastures and pine forest, leads you to the '
+        'lake, which warms to 20 degrees Celsius in the summer. Activities '
+        'enjoyed here include rowing, and riding the summer toboggan run.',
+        softWrap: true,
+        textAlign: TextAlign.justify,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.tertiary,
         ),
       ),
-      /*3*/
-      Icon(
-        Icons.star,
-        color: Colors.red[500],
-      ),
-      const Text('41'),
-    ],
-  ),
-);
+    ),
+  );
+}
 
-Widget buttonSection = Row(
-  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  children: [
-    _buildButtonColumn(Colors.blue, Icons.call, 'CALL'),
-    _buildButtonColumn(Colors.blue, Icons.near_me, 'ROUTE'),
-    _buildButtonColumn(Colors.blue, Icons.share, 'SHARE'),
-  ],
-);
-
-Widget textSection = const Padding(
-  padding: EdgeInsets.all(32),
-  child: Text(
-    'Lake Oeschinen lies at the foot of the Blüemlisalp in the Bernese '
-    'Alps. Situated 1,578 meters above sea level, it is one of the '
-    'larger Alpine Lakes. A gondola ride from Kandersteg, followed by a '
-    'half-hour walk through pastures and pine forest, leads you to the '
-    'lake, which warms to 20 degrees Celsius in the summer. Activities '
-    'enjoyed here include rowing, and riding the summer toboggan run.',
-    softWrap: true,
-    textAlign: TextAlign.justify,
-  ),
-);
-
-Column _buildButtonColumn(Color color, IconData icon, String label) {
+Column _buildButtonColumn(
+    BuildContext context, Color color, IconData icon, String label) {
   return Column(
     mainAxisSize: MainAxisSize.min,
     mainAxisAlignment: MainAxisAlignment.center,

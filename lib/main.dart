@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop_app/themes/dark_theme.dart';
+import 'package:flutter_shop_app/themes/light_theme.dart';
 import 'pages/auth/login_screen.dart';
 
 void main() {
@@ -13,10 +15,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Shop App',
-      home: LoginScreen(),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      title: 'My Shop App',
+      home: const LoginScreen(),
     );
   }
 }
