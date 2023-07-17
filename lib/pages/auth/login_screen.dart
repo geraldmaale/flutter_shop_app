@@ -89,43 +89,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 8,
               ),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    setState(() {
-                      isLoading = true;
-                    });
-                    loginFuture().then((value) {
-                      setState(() {
-                        isLoading = false;
-                      });
-                      if (value.isSuccessful) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) {
-                            return const Nature();
-                          }),
-                          (route) => false,
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(value.message),
-                            backgroundColor:
-                                const Color.fromARGB(255, 184, 15, 3),
-                          ),
-                        );
-                      }
-                    });
-                  }
-                },
+                onPressed: isLoading ? null : _onLogin,
                 child: Center(
                   child: isLoading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
+                          child: CircularProgressIndicator(),
                         )
                       : const Text(
                           "Login",
@@ -172,5 +142,40 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void _onLogin() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
+      loginFuture().then((value) {
+        setState(() {
+          isLoading = false;
+        });
+        if (value.isSuccessful) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return const Nature();
+            }),
+            (route) => false,
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(value.message),
+                backgroundColor: const Color.fromARGB(255, 184, 15, 3),
+                action: SnackBarAction(
+                  backgroundColor: Colors.grey[400],
+                  label: 'Ok',
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                )),
+          );
+        }
+      });
+    }
   }
 }
