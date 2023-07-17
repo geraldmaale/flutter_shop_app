@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop_app/components/avatar.dart';
+import 'package:flutter_shop_app/components/snackbar_utils.dart';
 import 'package:flutter_shop_app/endpoints/auth_endpoints.dart';
 import 'package:flutter_shop_app/helpers/api_result.dart';
 import 'package:flutter_shop_app/pages/auth/register_screen.dart';
@@ -18,6 +19,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // properties
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _snackBarUtils = const SnackBarUtils();
+
   final logger = Logger();
   bool isLoading = false;
 
@@ -157,22 +160,8 @@ class _LoginScreenState extends State<LoginScreen> {
             (route) => false,
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(value.message,
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                    )),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                action: SnackBarAction(
-                  backgroundColor: Theme.of(context).colorScheme.tertiary,
-                  textColor: Colors.grey[400],
-                  label: 'Ok',
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  },
-                )),
-          );
+          _snackBarUtils.showSnackBarError(context, value.message);
+          // showSnackBarError(value.message);
         }
       });
     }
