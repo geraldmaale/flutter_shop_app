@@ -161,12 +161,12 @@ class _LoginScreenState extends State<LoginScreen> {
             SnackBar(
                 content: Text(value.message,
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.tertiary,
+                      color: Colors.grey[400],
                     )),
                 backgroundColor: Theme.of(context).colorScheme.error,
                 action: SnackBarAction(
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
-                  textColor: Theme.of(context).colorScheme.error,
+                  textColor: Colors.grey[400],
                   label: 'Ok',
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
