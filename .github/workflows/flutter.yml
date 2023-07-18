@@ -36,4 +36,4 @@ jobs:
       run: flutter analyze       
 
     - name: Build APK (arm64)
-      run: flutter build apk --target-platform android-arm64 --split-debug-info=<v1.2.3/>
+      run: flutter build apk --target-platform android-arm64
