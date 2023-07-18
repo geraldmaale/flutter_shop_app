@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Flutter
+name: Dart
 
 on:
   push:
@@ -23,12 +23,12 @@ jobs:
       with:
         args: pub get
 
-      # Consider passing '--fatal-infos' for slightly stricter analysis.
-      - name: Analyze project source
-        uses: geowatson/flutter-latest@1.0.0
-        run: flutter analyze
+    # Consider passing '--fatal-infos' for slightly stricter analysis.
+    - name: Analyze project source
+      uses: geowatson/flutter-latest@1.0.0
+      run: flutter analyze
 
-      - name: Build android APK (arm64)
-        uses: geowatson/flutter-latest@1.0.0
-        run: flutter build apk --target-platform android-arm64
+    - name: Build android APK (arm64)
+      uses: geowatson/flutter-latest@1.0.0
+      run: flutter build apk --target-platform android-arm64
 
