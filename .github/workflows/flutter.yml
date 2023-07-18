@@ -25,4 +25,9 @@ jobs:
         # The Flutter version to make available on the path
         flutter-version: 3.10.6
         # The architecture of Flutter SDK executable (x64 or arm64)
-        
+
+    - name: Setup
+      run: flutter pub get
+
+    - name: Analyze
+      run: flutter analyze       
