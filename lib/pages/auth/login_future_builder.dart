@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop_app/endpoints/auth_endpoints.dart';
 import 'package:flutter_shop_app/helpers/api_result.dart';
-import 'package:flutter_shop_app/pages/auth/register_screen.dart';
 import 'package:flutter_shop_app/pages/nature.dart';
 import 'package:logger/logger.dart';
 
@@ -18,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final logger = Logger();
 
-  Future<ApiResult>? _loginFuture;
+  Future<ApiResult>? loginFuture;
 
   bool isLoading = false;
 
@@ -103,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     setState(() {
-                      _loginFuture = AuthEndpoints().loginUser(
+                      loginFuture = AuthEndpoints().loginUser(
                         _emailController.text,
                         _passwordController.text,
                       );
@@ -128,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(
                 height: 8,
               ),
-              if (_loginFuture != null) fetchFromApi(_loginFuture),
+              if (loginFuture != null) fetchFromApi(loginFuture),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -187,6 +186,69 @@ class _LoginScreenState extends State<LoginScreen> {
         }
         return const SizedBox.shrink(); // add a return statement at the end
       },
+    );
+  }
+}
+
+enum Gender {
+  male,
+  female,
+  other,
+}
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
+
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  Gender? _selectedGender;
+
+  @override
+  Widget build(BuildContext context) {
+    var formKey;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Register"),
+      ),
+      body: Form(
+        key: formKey,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ...
+              DropdownButtonFormField<Gender>(
+                value: _selectedGender,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedGender = value;
+                  });
+                },
+                items: Gender.values.map((gender) {
+                  return DropdownMenuItem<Gender>(
+                    value: gender,
+                    child: Text(gender.toString().split('.').last),
+                  );
+                }).toList(),
+                decoration: const InputDecoration(
+                  labelText: "Gender",
+                ),
+                validator: (value) {
+                  if (value == null) {
+                    return "Please select your gender";
+                  }
+                  return null;
+                },
+              ),
+              // ...
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

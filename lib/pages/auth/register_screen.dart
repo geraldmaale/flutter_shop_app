@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shop_app/components/avatar.dart';
-import 'package:flutter_shop_app/components/snackbar_utils.dart';
+import 'package:flutter_shop_app/widgets/avatar.dart';
+import 'package:flutter_shop_app/widgets/snackbar_utils.dart';
 import 'package:flutter_shop_app/endpoints/auth_endpoints.dart';
 import 'package:flutter_shop_app/helpers/api_result.dart';
 import 'package:flutter_shop_app/pages/auth/login_screen.dart';

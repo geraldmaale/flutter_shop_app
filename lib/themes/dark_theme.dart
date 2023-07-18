@@ -11,7 +11,7 @@ ThemeData darkTheme = ThemeData(
     ),
   ),
   colorScheme: ColorScheme.dark(
-    primary: Colors.grey[500]!,
+    primary: Colors.blue[200]!,
     secondary: Colors.grey[700]!,
     background: Colors.grey[900]!,
     error: const Color.fromARGB(255, 134, 9, 9),

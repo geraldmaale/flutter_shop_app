@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_shop_app/helpers/auth_models.dart';
-import 'package:flutter_shop_app/helpers/constants.dart';
+import 'package:flutter_shop_app/models/authentication.dart';
+import 'package:flutter_shop_app/constants/api_endpoints.dart';
 import 'package:flutter_shop_app/helpers/api_result.dart';
 import 'package:logger/logger.dart';
 
@@ -21,7 +21,7 @@ class AuthEndpoints {
 
     try {
       var response = await httpClient.post(
-        Constants.registerUrl,
+        ApiEndpoints.registerUrl,
         data: body,
         options: Options(
           headers: {
@@ -52,17 +52,18 @@ class AuthEndpoints {
     }
   }
 
-  Future<ApiResult> loginUser(String email, String password) async {
+  Future<ApiResult<UserWithToken>> loginUser(
+      String email, String password) async {
     var body = {
       'username': email,
       'password': password,
     };
 
-    ApiResult apiResult;
+    ApiResult<UserWithToken> apiResult;
 
     try {
       var response = await httpClient.post(
-        Constants.loginUrl,
+        ApiEndpoints.loginUrl,
         data: body,
         options: Options(
           headers: {

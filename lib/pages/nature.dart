@@ -1,7 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_session_jwt/flutter_session_jwt.dart';
+import 'package:flutter_shop_app/constants/colors.dart';
+import 'package:flutter_shop_app/constants/user_roles.dart';
+import 'package:flutter_shop_app/pages/auth/login_screen.dart';
+import 'package:logger/logger.dart';
 
-class Nature extends StatelessWidget {
+class Nature extends StatefulWidget {
   const Nature({super.key});
+
+  @override
+  State<Nature> createState() => _NatureState();
+}
+
+class _NatureState extends State<Nature> {
+  get logger => Logger();
+  Map<String, dynamic> _claims = {};
+
+  Future getAuthClaims() async {
+    try {
+      var payload = await FlutterSessionJwt.getPayload();
+      return payload;
+    } on Exception catch (e) {
+      logger.e(e);
+      return {};
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getAuthClaims().then((value) {
+      setState(() {
+        _claims = value;
+      });
+      logger.i("# claims: ${_claims.length}");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -9,6 +43,20 @@ class Nature extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text('Talk about nature'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return const LoginScreen();
+                }),
+                (route) => false,
+              );
+            },
+          ),
+        ],
       ),
       body: ListView(
         children: [
@@ -18,8 +66,8 @@ class Nature extends StatelessWidget {
             height: 240,
             fit: BoxFit.cover,
           ),
-          titleSection(context),
-          buttonSection(context),
+          titleSection(context, _claims),
+          buttonSection(context, _claims),
           textSection(context),
         ],
       ),
@@ -27,7 +75,7 @@ class Nature extends StatelessWidget {
   }
 }
 
-Widget titleSection(BuildContext context) {
+Widget titleSection(BuildContext context, Map<String, dynamic> claims) {
   return Container(
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.background,
@@ -44,14 +92,14 @@ Widget titleSection(BuildContext context) {
               Container(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
-                  'Oeschinen Lake Campground',
+                  "Hi ${claims["name"]}",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
-              Text('Kandersteg, Switzerland',
+              Text(claims[UserRoles.role],
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.secondary,
                   )),
@@ -61,23 +109,27 @@ Widget titleSection(BuildContext context) {
         /*3*/
         Icon(
           Icons.star,
-          color: Theme.of(context).colorScheme.error,
+          color: AppColors.favorite,
         ),
-        Text('41',
+        Text(claims.length.toString(),
             style: TextStyle(
-              color: Theme.of(context).colorScheme.error,
+              color: AppColors.favorite,
             )),
       ],
     ),
   );
 }
 
-Widget buttonSection(BuildContext context) {
+Widget buttonSection(BuildContext context, Map<String, dynamic> claims) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     children: [
-      _buildButtonColumn(
-          context, Theme.of(context).colorScheme.primary, Icons.call, 'CALL'),
+      if (claims[UserRoles.role] == UserRoles.systemAdmin)
+        _buildButtonColumn(
+            context, Theme.of(context).colorScheme.primary, Icons.edit, 'EDIT'),
+      if (claims[UserRoles.role] == UserRoles.systemAdmin)
+        _buildButtonColumn(
+            context, Theme.of(context).colorScheme.primary, Icons.call, 'CALL'),
       _buildButtonColumn(context, Theme.of(context).colorScheme.primary,
           Icons.near_me, 'ROUTE'),
       _buildButtonColumn(
