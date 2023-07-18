@@ -3,6 +3,7 @@ import 'package:flutter_session_jwt/flutter_session_jwt.dart';
 import 'package:flutter_shop_app/constants/colors.dart';
 import 'package:flutter_shop_app/constants/user_roles.dart';
 import 'package:flutter_shop_app/pages/auth/login_screen.dart';
+import 'package:flutter_shop_app/pages/auth/show_claims.dart';
 import 'package:logger/logger.dart';
 
 class Nature extends StatefulWidget {
@@ -69,6 +70,42 @@ class _NatureState extends State<Nature> {
           titleSection(context, _claims),
           buttonSection(context, _claims),
           textSection(context),
+          Padding(
+            padding: const EdgeInsets.only(
+              top: 8,
+              left: 32,
+              bottom: 8,
+            ),
+            child: Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return ShowClaimsScreen(claims: _claims);
+                      }),
+                    );
+                  },
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(AppColors.favorite),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    "Show ${_claims.length} Claims ",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -99,7 +136,7 @@ Widget titleSection(BuildContext context, Map<String, dynamic> claims) {
                   ),
                 ),
               ),
-              Text(claims[UserRoles.role],
+              Text(claims.isNotEmpty ? claims["email"] : "",
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.secondary,
                   )),
