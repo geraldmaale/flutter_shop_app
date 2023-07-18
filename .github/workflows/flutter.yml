@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: run
+    name: Flutter Setup & Analyze
     runs-on: ubuntu-latest
     steps:
     - name: Flutter action
@@ -34,3 +34,6 @@ jobs:
 
     - name: Analyze
       run: flutter analyze       
+
+    - name: Build APK (arm64)
+      run: flutter build apk --target-platform android-arm64 --split-debug-info=<v1.2.3/>
