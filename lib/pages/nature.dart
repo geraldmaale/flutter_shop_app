@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_session_jwt/flutter_session_jwt.dart';
 import 'package:flutter_shop_app/constants/colors.dart';
 import 'package:flutter_shop_app/constants/user_roles.dart';
 import 'package:flutter_shop_app/pages/auth/login_screen.dart';
@@ -17,25 +16,18 @@ class _NatureState extends State<Nature> {
   get logger => Logger();
   Map<String, dynamic> _claims = {};
 
-  Future getAuthClaims() async {
-    try {
-      var payload = await FlutterSessionJwt.getPayload();
-      return payload;
-    } on Exception catch (e) {
-      logger.e(e);
-      return {};
-    }
-  }
+  // Future getAuthClaims() async {
+  //   try {
+
+  //   } on Exception catch (e) {
+  //     logger.e(e);
+  //     return {};
+  //   }
+  // }
 
   @override
   void initState() {
     super.initState();
-    getAuthClaims().then((value) {
-      setState(() {
-        _claims = value;
-      });
-      logger.i("# claims: ${_claims.length}");
-    });
   }
 
   @override

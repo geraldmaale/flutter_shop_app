@@ -37,7 +37,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   logger: ^1.4.0
   dio: ^5.2.1+1
-  flutter_session_jwt: ^0.0.5
+  # flutter_session_jwt: ^0.0.5
+  provider: ^6.0.5
+  shared_preferences: ^2.2.0
 
 dev_dependencies:
   flutter_test:
