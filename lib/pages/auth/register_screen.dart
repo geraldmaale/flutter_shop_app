@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop_app/widgets/avatar.dart';
 import 'package:flutter_shop_app/widgets/snackbar_utils.dart';
-import 'package:flutter_shop_app/endpoints/auth_endpoints.dart';
+import 'package:flutter_shop_app/services/auth_service.dart';
 import 'package:flutter_shop_app/helpers/api_result.dart';
 import 'package:flutter_shop_app/pages/auth/login_screen.dart';
 
@@ -25,7 +25,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool isLoading = false;
 
   Future<ApiResult> registerFuture() async {
-    return await AuthEndpoints().createUser(
+    return await AuthService().createUser(
       _emailController.text,
       _fullNameController.text,
       _passwordController.text,

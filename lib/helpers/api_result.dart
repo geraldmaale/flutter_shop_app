@@ -22,4 +22,11 @@ class ApiResult<T> {
       message: json['message'],
     );
   }
+
+  factory ApiResult.fromErrorString(String message) {
+    return ApiResult(
+      isSuccessful: false,
+      message: message,
+    );
+  }
 }

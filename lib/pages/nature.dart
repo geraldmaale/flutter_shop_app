@@ -3,7 +3,9 @@ import 'package:flutter_shop_app/constants/colors.dart';
 import 'package:flutter_shop_app/constants/user_roles.dart';
 import 'package:flutter_shop_app/pages/auth/login_screen.dart';
 import 'package:flutter_shop_app/pages/auth/show_claims.dart';
+import 'package:flutter_shop_app/providers/user_provider.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 class Nature extends StatefulWidget {
   const Nature({super.key});
@@ -16,18 +18,11 @@ class _NatureState extends State<Nature> {
   get logger => Logger();
   Map<String, dynamic> _claims = {};
 
-  // Future getAuthClaims() async {
-  //   try {
-
-  //   } on Exception catch (e) {
-  //     logger.e(e);
-  //     return {};
-  //   }
-  // }
-
   @override
   void initState() {
     super.initState();
+    _claims = Provider.of<UserProvider>(context, listen: false).claims;
+    Logger().i("nature claims ", _claims);
   }
 
   @override
@@ -43,6 +38,9 @@ class _NatureState extends State<Nature> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) {
+                  // Clear user data
+                  // Provider.of<UserProvider>(context, listen: false)
+                  //     .clearAndLogout();
                   return const LoginScreen();
                 }),
                 (route) => false,

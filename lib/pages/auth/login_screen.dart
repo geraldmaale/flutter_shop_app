@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop_app/models/loginrequest.dart';
 import 'package:flutter_shop_app/widgets/avatar.dart';
 import 'package:flutter_shop_app/widgets/snackbar_utils.dart';
-import 'package:flutter_shop_app/endpoints/auth_endpoints.dart';
+import 'package:flutter_shop_app/services/auth_service.dart';
 import 'package:flutter_shop_app/helpers/api_result.dart';
-import 'package:flutter_shop_app/models/authentication.dart';
 import 'package:flutter_shop_app/pages/auth/register_screen.dart';
 import 'package:flutter_shop_app/pages/nature.dart';
 import 'package:logger/logger.dart';
@@ -25,9 +25,15 @@ class _LoginScreenState extends State<LoginScreen> {
   final logger = Logger();
   bool isLoading = false;
 
-  Future<ApiResult<UserWithToken>> loginFuture() async {
-    return await AuthEndpoints()
-        .loginUser(_emailController.text, _passwordController.text);
+  Future<ApiResult> loginFuture(BuildContext context) async {
+    final res = await AuthService().loginUser(
+      context,
+      LoginRequest(
+        userName: _emailController.text,
+        password: _passwordController.text,
+      ),
+    );
+    return res;
   }
 
   @override
@@ -148,15 +154,11 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         isLoading = true;
       });
-      loginFuture().then((value) {
+      loginFuture(context).then((value) {
         setState(() {
           isLoading = false;
         });
         if (value.isSuccessful) {
-          // todo: cache token
-          final results = value.result!;
-          debugPrint(results.accessToken);
-
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) {
