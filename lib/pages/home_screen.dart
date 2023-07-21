@@ -4,43 +4,51 @@ import 'package:flutter_shop_app/constants/user_roles.dart';
 import 'package:flutter_shop_app/pages/auth/login_screen.dart';
 import 'package:flutter_shop_app/pages/auth/show_claims.dart';
 import 'package:flutter_shop_app/providers/user_provider.dart';
-import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
-class Nature extends StatefulWidget {
-  const Nature({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<Nature> createState() => _NatureState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _NatureState extends State<Nature> {
-  get logger => Logger();
-  Map<String, dynamic> _claims = {};
+class _HomeScreenState extends State<HomeScreen> {
+  Map<String, dynamic> claims = {};
 
   @override
   void initState() {
     super.initState();
-    _claims = Provider.of<UserProvider>(context, listen: false).claims;
-    Logger().i("nature claims ", _claims);
+    Provider.of<UserProvider>(context, listen: false)
+        .getUserClaims()
+        .then((value) {
+      claims = value;
+      return value;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    setState(() {
+      claims = Provider.of<UserProvider>(context).claims;
+    });
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text('Talk about nature'),
         actions: [
+          // Logout button
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
+              // Clear all shared preferences
+              Provider.of<UserProvider>(context, listen: false)
+                  .clearAndLogout();
+
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) {
-                  // Clear user data
-                  // Provider.of<UserProvider>(context, listen: false)
-                  //     .clearAndLogout();
                   return const LoginScreen();
                 }),
                 (route) => false,
@@ -57,8 +65,8 @@ class _NatureState extends State<Nature> {
             height: 240,
             fit: BoxFit.cover,
           ),
-          titleSection(context, _claims),
-          buttonSection(context, _claims),
+          titleSection(context, claims),
+          buttonSection(context, claims),
           textSection(context),
           Padding(
             padding: const EdgeInsets.only(
@@ -73,7 +81,7 @@ class _NatureState extends State<Nature> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) {
-                        return ShowClaimsScreen(claims: _claims);
+                        return ShowClaimsScreen(claims: claims);
                       }),
                     );
                   },
@@ -87,7 +95,7 @@ class _NatureState extends State<Nature> {
                     ),
                   ),
                   child: Text(
-                    "Show ${_claims.length} Claims ",
+                    "Show ${claims.length} Claims ",
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
@@ -102,7 +110,7 @@ class _NatureState extends State<Nature> {
   }
 }
 
-Widget titleSection(BuildContext context, Map<String, dynamic> claims) {
+Widget titleSection(BuildContext context, Map<String, dynamic> userClaims) {
   return Container(
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.background,
@@ -119,14 +127,14 @@ Widget titleSection(BuildContext context, Map<String, dynamic> claims) {
               Container(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
-                  "Hi ${claims["name"]}",
+                  "Hi ${userClaims["name"]}",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
-              Text(claims.isNotEmpty ? claims["email"] : "",
+              Text(userClaims.isNotEmpty ? userClaims["email"] : "",
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.secondary,
                   )),
@@ -138,7 +146,7 @@ Widget titleSection(BuildContext context, Map<String, dynamic> claims) {
           Icons.star,
           color: AppColors.favorite,
         ),
-        Text(claims.length.toString(),
+        Text(userClaims.length.toString(),
             style: TextStyle(
               color: AppColors.favorite,
             )),
@@ -151,10 +159,10 @@ Widget buttonSection(BuildContext context, Map<String, dynamic> claims) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     children: [
-      if (claims[UserRoles.role] == UserRoles.systemAdmin)
+      if (claims[ClaimTypes.role] == ClaimTypes.systemAdmin)
         _buildButtonColumn(
             context, Theme.of(context).colorScheme.primary, Icons.edit, 'EDIT'),
-      if (claims[UserRoles.role] == UserRoles.systemAdmin)
+      if (claims[ClaimTypes.role] == ClaimTypes.systemAdmin)
         _buildButtonColumn(
             context, Theme.of(context).colorScheme.primary, Icons.call, 'CALL'),
       _buildButtonColumn(context, Theme.of(context).colorScheme.primary,

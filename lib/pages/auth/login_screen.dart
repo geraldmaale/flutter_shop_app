@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop_app/models/loginrequest.dart';
+import 'package:flutter_shop_app/providers/user_provider.dart';
 import 'package:flutter_shop_app/widgets/avatar.dart';
+import 'package:flutter_shop_app/widgets/bottom_navigation.dart';
 import 'package:flutter_shop_app/widgets/snackbar_utils.dart';
 import 'package:flutter_shop_app/services/auth_service.dart';
 import 'package:flutter_shop_app/helpers/api_result.dart';
 import 'package:flutter_shop_app/pages/auth/register_screen.dart';
-import 'package:flutter_shop_app/pages/nature.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -149,20 +151,86 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  FutureBuilder<ApiResult> loginBuilder(BuildContext context) {
+    return FutureBuilder<ApiResult>(
+      future: AuthService().loginUser(
+        context,
+        LoginRequest(
+          userName: _emailController.text,
+          password: _passwordController.text,
+        ),
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          setState(() {
+            isLoading = false;
+          });
+
+          if (snapshot.hasData) {
+            if (snapshot.data!.isSuccessful) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return const BottomNavigation();
+                }),
+                (route) => false,
+              );
+              return const SizedBox.shrink();
+            } else {
+              _snackBarUtils.showSnackBarError(context, snapshot.data!.message);
+              return const SizedBox.shrink();
+            }
+          } else if (snapshot.hasError) {
+            logger.e(snapshot.error.toString());
+            _snackBarUtils.showSnackBarError(
+                context, snapshot.error.toString());
+            return const SizedBox.shrink();
+          } else {
+            logger.i("No user found, redirecting to login screen");
+            _snackBarUtils.showSnackBarError(
+                context, "No user found, redirecting to login screen");
+            return const SizedBox.shrink();
+          }
+        } else {
+          // Show loading indicator
+          setState(() {
+            isLoading = true;
+          });
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+      },
+    );
+  }
+
   void _onLogin() {
     if (_formKey.currentState!.validate()) {
       setState(() {
         isLoading = true;
       });
-      loginFuture(context).then((value) {
+      AuthService()
+          .loginUser(
+        context,
+        LoginRequest(
+          userName: _emailController.text,
+          password: _passwordController.text,
+        ),
+      )
+          .then((value) {
         setState(() {
           isLoading = false;
         });
         if (value.isSuccessful) {
+          Provider.of<UserProvider>(context, listen: false)
+              .setUserWithToken(value.result!);
+
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) {
-              return const Nature();
+              return const BottomNavigation();
             }),
             (route) => false,
           );

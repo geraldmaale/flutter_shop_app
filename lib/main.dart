@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shop_app/pages/auth/register_screen.dart';
-import 'package:flutter_shop_app/pages/nature.dart';
+import 'package:flutter_shop_app/models/userwithtoken.dart';
 import 'package:flutter_shop_app/providers/user_provider.dart';
 import 'package:flutter_shop_app/services/auth_service.dart';
 import 'package:flutter_shop_app/themes/dark_theme.dart';
 import 'package:flutter_shop_app/themes/light_theme.dart';
+import 'package:flutter_shop_app/widgets/bottom_navigation.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'pages/auth/login_screen.dart';
@@ -29,6 +29,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final AuthService _authService = AuthService();
+  final Logger _logger = Logger();
 
   // This widget is the root of your application.
   @override
@@ -38,19 +39,18 @@ class _MyAppState extends State<MyApp> {
       theme: lightTheme,
       darkTheme: darkTheme,
       title: 'My Shop App',
-      home: FutureBuilder<String>(
+      home: FutureBuilder<UserWithToken>(
         future: _authService.getUser(context),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasData) {
-              Logger().i("user token ", snapshot.data);
-              return const Nature();
+              return const BottomNavigation();
             } else if (snapshot.hasError) {
-              // Show loading indicator
+              _logger.e(snapshot.error.toString());
               return const LoginScreen();
             } else {
-              // Show loading indicator
-              return const RegisterScreen();
+              _logger.i("No user found, redirecting to login screen");
+              return const LoginScreen();
             }
           } else {
             // Show loading indicator
